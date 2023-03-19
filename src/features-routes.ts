@@ -3,7 +3,7 @@ import fs from 'fs';
 
 import Express from 'express';
 
-const router = Express.Router();
+const featuresRouter = Express.Router();
 
 /**
  * Retrieves all of the features name that are within `features` folder.
@@ -18,7 +18,7 @@ interface RoutesFromFeature {
 }
 
 /**
- * Gets all of the routes name for a feature, route folder has to be created inside of the feature, otherwise, node app will crash.
+ * Gets all of the routes name from a feature, route folder has to be created inside of the feature, otherwise, node app will crash.
  *
  * @param featureName name of the feature to retrieve its routes.
  * @returns All of the routes name for a single feature.
@@ -38,7 +38,7 @@ const getRoutesNameFromFeature = (featureName: string): RoutesFromFeature => {
  * Gathers all of the existing routes name inside the features folder into a single array.
  *
  * @param featuresName Name of all the features inside features folder
- * @returns Routes name array
+ * @returns Routes array
  */
 const getRoutesNameForAllFeatures = (featuresName: string[]): RoutesFromFeature[] =>
     featuresName.reduce<RoutesFromFeature[]>(
@@ -57,7 +57,40 @@ const getRoutesNameForAllFeatures = (featuresName: string[]): RoutesFromFeature[
  */
 const removeTSExtensionFromRouteName = (routeName: string) => routeName.replace('.ts', '');
 
-const getRoutesFromFeatures = () => {
+/**
+ * Loads all of the routes that are within any feature inside the feature folder, routes are loaded inside a express `router` with their respective routes (POST, GET, PUT, PATH, DELETE or any that you would be using insde a router).
+ *
+ * This function avoids to be adding new routes manually, instead, this is done in a programmatic way.
+ *
+ * For this to work, a certain file structure must be followed:
+ *
+ * ```
+ * - src/
+ * -- features/
+ * --- [feature-name]/
+ * ---- routes/
+ * ----- [route-name]
+ * ```
+ *
+ * The generated REST API route would be in this format: `/[route-name]`,
+ * which would contain any of the actions described in that route
+ *
+ * @example
+ * posts ([route-name]) has:
+ * ```
+ *  router
+ *     .get('/', controller)
+ *     .post('/new-entry', postController)
+ * ```
+ *
+ * A route within: `src/features/posts/routes/feed`, would result in the next endpoints:
+ * ```
+ *  * /feed [GET]
+ *  * /feed/new-entry [POST]
+ * ```
+ */
+
+const loadRoutesFromFeatures = () => {
     const featuresName: string[] = getFeaturesName();
     const featuresAndRoutes: RoutesFromFeature[] = getRoutesNameForAllFeatures(featuresName);
 
@@ -73,15 +106,13 @@ const getRoutesFromFeatures = () => {
                 routeWithoutExtension,
             );
 
-            console.log(routePath);
-
             import(routePath).then((module) => {
-                router.use(`/${routeWithoutExtension}`, module.router);
+                featuresRouter.use(`/${routeWithoutExtension}`, module.router);
             });
         });
     });
 };
 
-getRoutesFromFeatures();
+loadRoutesFromFeatures();
 
-export { router };
+export { featuresRouter };

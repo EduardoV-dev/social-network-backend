@@ -1,13 +1,13 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import { router } from './dynamic-routes';
+import { featuresRouter } from './features-routes';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
-app.use('/api', router);
+app.use('/api', featuresRouter);
 
 const PORT = process.env.PORT || 3120;
 
