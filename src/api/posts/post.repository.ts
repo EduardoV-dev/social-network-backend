@@ -18,7 +18,7 @@ class PostRepositoryClass implements PostCRUD {
     public findById = (_id: string) =>
         PostModel.findById(new Types.ObjectId(_id))
             .where({ active: true })
-            .populate('creator', '-password') as Promise<PostDocument | null>;
+            .populate('creator', ['-password', '-posts']) as Promise<PostDocument | null>;
 
     public updateById = (_id: string, resource: PostRequest) =>
         PostModel.findByIdAndUpdate(_id, resource, { new: true }) as Promise<PostDocument>;

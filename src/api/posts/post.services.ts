@@ -25,6 +25,12 @@ interface PostMutation {
     postId: string;
 }
 
+interface PostCreation {
+    post: PostRequest;
+    image: Image;
+    userId: string;
+}
+
 interface PostEdition extends PostMutation {
     post: PostRequest;
     image: Image;
@@ -53,13 +59,14 @@ class PostServicesClass {
         return responseFromDB.post;
     };
 
-    public create = async (resource: Post, image: Image): Promise<PostReturn> => {
+    public create = async ({ post, image, userId }: PostCreation): Promise<PostReturn> => {
         if (!image) throw new HttpError('Post image is required', 400);
         if (!image.mimetype.includes('image')) throw new HttpError('File is not an image', 400);
 
         const [imageUrl] = await uploadToCloudinary([image], POST_IMAGES_FOLDER);
         const response: PostDocument = await PostRepository.create({
-            ...resource,
+            ...post,
+            creator: userId,
             image: imageUrl,
         });
 
