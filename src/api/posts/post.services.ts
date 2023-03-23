@@ -1,32 +1,69 @@
 import { uploadToCloudinary } from '../../lib/cloudinary';
 import { HttpError } from '../../lib/http-error';
+import { User } from '../users/user.models';
 
-import { Post, PostDocument } from './post.models';
+import { Post, PostDocument, PostRequest } from './post.models';
 import { PostRepository } from './post.repository';
 
 const POSTS_PER_PAGE = 2;
 
-interface GetPostsReturn {
+type Image = Express.Multer.File | undefined;
+
+export interface GetPostsReturn {
     message: string;
-    posts: Partial<PostDocument[]>;
+    posts: Post[];
     totalItems: number;
 }
 
-class PostServicesClass {
-    public create = async (
-        resource: Post,
-        image: Express.Multer.File | undefined,
-    ): Promise<Post> => {
-        if (!image) throw new HttpError('Post image is required', 400);
-        if (!image.mimetype.includes('image'))
-            throw new HttpError('Uploaded file is not an image', 400);
+export interface PostReturn {
+    message: string;
+    post: PostDocument;
+}
 
-        const [imageUrl] = await uploadToCloudinary([image], 'posts');
+interface PostMutation {
+    userId: string;
+    postId: string;
+}
+
+interface PostEdition extends PostMutation {
+    post: PostRequest;
+    image: Image;
+}
+
+const POST_IMAGES_FOLDER = 'posts';
+
+class PostServicesClass {
+    /**
+     * Verifies if the userId from the authentication middleware is the same that created a post, if true,
+     * user will be able to delete or update post, else, will not be able to do it.
+     *
+     * @param Mutation Configutation params for the function
+     * @param Mutation.postId Id for the post that could be mutated (updated or deleted)
+     * @param Mutation.userId Id for the current authenticated user
+     * @throws HttpError for forbidden action
+     * @returns PostDocument from database, Post belongs to the passed postId
+     */
+    private checkIfUserIsCreator = async ({
+        postId,
+        userId,
+    }: PostMutation): Promise<PostDocument> => {
+        const responseFromDB = await this.getPost(postId);
+        const isCreator: boolean = (responseFromDB.post.creator as User)._id.toString() === userId;
+        if (!isCreator) throw new HttpError('You are not allowed for this action', 403);
+        return responseFromDB.post;
+    };
+
+    public create = async (resource: Post, image: Image): Promise<PostReturn> => {
+        if (!image) throw new HttpError('Post image is required', 400);
+        if (!image.mimetype.includes('image')) throw new HttpError('File is not an image', 400);
+
+        const [imageUrl] = await uploadToCloudinary([image], POST_IMAGES_FOLDER);
         const response: PostDocument = await PostRepository.create({
             ...resource,
             image: imageUrl,
         });
-        return response;
+
+        return { message: 'Post created', post: response };
     };
 
     public getPosts = async (page: number): Promise<GetPostsReturn> => {
@@ -36,11 +73,36 @@ class PostServicesClass {
         return { message: 'Posts fetched successfully', posts, totalItems: totalPosts };
     };
 
-    // public deleteById = (_id: string) => Promise<Post>;
+    public getPost = async (postId: string): Promise<PostReturn> => {
+        const post: PostDocument | null = await PostRepository.findById(postId);
+        if (!post) throw new HttpError('No post was found', 404);
+        return { message: 'Post fetched', post };
+    };
 
-    // public findById = (_id: number) => Promise<Post>;
+    public updatePost = async ({
+        userId,
+        image,
+        post,
+        postId,
+    }: PostEdition): Promise<PostReturn> => {
+        const postFromDB: PostDocument = await this.checkIfUserIsCreator({ userId, postId });
+        const [imageUrl]: string[] = image
+            ? await uploadToCloudinary([image], POST_IMAGES_FOLDER)
+            : [postFromDB.image];
 
-    // public updateById = (_id: string, resource: Post) => Promise<Post>;
+        const updatedPost: PostDocument = await PostRepository.updateById(postId, {
+            ...post,
+            image: imageUrl,
+        });
+
+        return { message: 'Post updated', post: updatedPost };
+    };
+
+    public deletePost = async (config: PostMutation): Promise<PostReturn> => {
+        await this.checkIfUserIsCreator(config);
+        const deletedPost: PostDocument = await PostRepository.deleteById(config.postId);
+        return { message: 'Post delete', post: deletedPost };
+    };
 }
 
 export const PostServices = new PostServicesClass();

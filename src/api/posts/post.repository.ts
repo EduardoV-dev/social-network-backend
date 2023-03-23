@@ -1,21 +1,29 @@
-import { RequestPost, PostDocument, PostModel } from './post.models';
+import { Types } from 'mongoose';
 
-type PostCRUD = Pick<Global.CRUD, 'create' | 'findAll'> & {
+import { PostDocument, PostModel, PostRequest } from './post.models';
+
+type PostCRUD = Global.CRUD & {
     count: () => Promise<number>;
 };
 
 class PostRepositoryClass implements PostCRUD {
-    public count = (): Promise<number> => PostModel.countDocuments();
+    public count = (): Promise<number> => PostModel.countDocuments({ active: true });
 
-    public create = (resource: RequestPost): Promise<PostDocument> => PostModel.create(resource);
+    public create = (resource: PostRequest): Promise<PostDocument> =>
+        new PostModel(resource).save();
 
-    // public deleteById = (_id: string) => Promise<Post>;
+    public findAll = (limit: number, skip: number): Promise<PostDocument[]> =>
+        PostModel.find({ active: true }).sort({ createdAt: 'ascending' }).skip(skip).limit(limit);
 
-    public findAll = (limit: number, skip: number) => PostModel.find().skip(skip).limit(limit);
+    public findById = (_id: string) =>
+        PostModel.findById(new Types.ObjectId(_id))
+            .where({ active: true })
+            .populate('creator', '-password') as Promise<PostDocument | null>;
 
-    // public findById = (_id: number) => Promise<Post>;
+    public updateById = (_id: string, resource: PostRequest) =>
+        PostModel.findByIdAndUpdate(_id, resource, { new: true }) as Promise<PostDocument>;
 
-    // public updateById = (_id: string, resource: Post) => Promise<Post>;
+    public deleteById = (_id: string) => this.updateById(_id, { active: false } as PostRequest);
 }
 
 export const PostRepository = new PostRepositoryClass();

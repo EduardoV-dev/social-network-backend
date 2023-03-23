@@ -1,7 +1,7 @@
 declare namespace NodeJS {
     interface ProcessEnv {
         NODE_ENV: 'development' | 'production';
-        PORT: number;
+        PORT: string;
         MONGODB_USERNAME: string;
         MONGODB_PASSWORD: string;
         DB_NAME: string;
@@ -17,7 +17,7 @@ declare namespace Global {
         create: (resource: any) => Promise<any>;
         deleteById: (_id: string) => Promise<any>;
         findAll: (limit: number, skip: number) => Promise<any>;
-        findById: (_id: number) => Promise<any>;
+        findById: (_id: string) => Promise<any>;
         updateById: (_id: string, resource: any) => Promise<any>;
     }
 

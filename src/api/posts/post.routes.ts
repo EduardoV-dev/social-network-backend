@@ -1,26 +1,22 @@
 import express from 'express';
 
 import { uploadSingleFile } from '../../lib/multer';
-import { authenticate } from '../../middlewares/authentication';
+import { authenticateAccess } from '../../middlewares/authentication';
 import { onValidationError } from '../../middlewares/validation-error';
 
-import { createPost, getPosts } from './post.controllers';
-import { postValidation } from './post.validations';
+import { PostControllers } from './post.controllers';
+import { postValidators } from './post.validations';
 
 const router = express.Router();
 
+const uploadMiddleware = uploadSingleFile('image');
+
 router
-    .use(authenticate)
-    .get('/', getPosts)
-    .get('/:id', (req, res) => {
-        res.status(200).send({ message: 'Post by id' });
-    })
-    .post('/', uploadSingleFile('image'), postValidation, onValidationError, createPost)
-    .put('/', (req, res) => {
-        res.status(201).send({ message: 'Updated' });
-    })
-    .delete('/', (req, res) => {
-        res.status(200).send({ message: 'Deleted' });
-    });
+    .use(authenticateAccess)
+    .get('/', PostControllers.getPosts)
+    .post('/', uploadMiddleware, postValidators, onValidationError, PostControllers.createPost)
+    .get('/:id', PostControllers.getPost)
+    .put('/:id', uploadMiddleware, postValidators, onValidationError, PostControllers.updatePost)
+    .delete('/:id', PostControllers.deletePost);
 
 export { router };

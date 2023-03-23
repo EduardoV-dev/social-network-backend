@@ -1,11 +1,12 @@
-import { User, UserDocument, UserModel } from './user.models';
+import { UserDocument, UserModel, UserRequest } from './user.models';
 
 type UserCRUD = Pick<Global.CRUD, 'create'> & {
     findByEmail: (email: string) => Promise<UserDocument>;
 };
 
 class UserRepositoryClass implements UserCRUD {
-    public create = (resource: User): Promise<UserDocument> => UserModel.create(resource);
+    public create = (resource: UserRequest) =>
+        new UserModel(resource).save() as Promise<UserDocument>;
 
     public findByEmail = (email: string) => UserModel.findOne({ email }) as Promise<UserDocument>;
 }

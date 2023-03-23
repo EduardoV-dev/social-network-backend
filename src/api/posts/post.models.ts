@@ -1,19 +1,22 @@
-import { Document, model, Schema } from 'mongoose';
+import { model, Schema } from 'mongoose';
 
+import { Entity, EntityDocument } from '../../types/models.types';
 import { User } from '../users/user.models';
 
-export interface RequestPost {
+export interface PostRequest {
+    active: boolean;
     content: string;
-    creator: string | User;
+    creator: string | Partial<User>;
     image: string;
     title: string;
 }
 
-export interface PostDocument extends RequestPost, Document<RequestPost> {}
-export interface Post extends RequestPost {}
+export interface Post extends Entity<PostRequest> {}
+export interface PostDocument extends EntityDocument<Post> {}
 
-const postSchema = new Schema<RequestPost>(
+const postSchema = new Schema<PostDocument>(
     {
+        active: { type: Boolean, default: true },
         content: { type: String, required: true },
         creator: { ref: 'User', required: true, type: Schema.Types.ObjectId },
         image: { type: String, required: true },
