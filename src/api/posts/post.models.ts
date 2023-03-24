@@ -26,3 +26,33 @@ const postSchema = new Schema<PostDocument>(
 );
 
 export const PostModel = model<PostDocument>('Post', postSchema);
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Post:
+ *       type: object
+ *       required:
+ *         - content
+ *         - title
+ *         - image
+ *       properties:
+ *         _id:
+ *           type: string
+ *         active:
+ *           type: boolean
+ *         content:
+ *           type: string
+ *         creator:
+ *           type: string
+ *         image:
+ *           type: string
+ *           format: binary
+ *         title:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *         updatedAt:
+ *           type: string
+ */

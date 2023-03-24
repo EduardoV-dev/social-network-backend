@@ -3,14 +3,12 @@ import { model, Schema } from 'mongoose';
 
 import { HttpError } from '../../lib/http-error';
 import { Entity, EntityDocument } from '../../types/models.types';
-import { PostRequest } from '../posts/post.models';
 
 export interface UserRequest {
     active: boolean;
     email: string;
     name: string;
     password: string;
-    posts: PostRequest[];
     status: string;
 }
 
@@ -26,13 +24,6 @@ const userSchema = new Schema<UserDocument>(
         name: { type: String, required: true },
         password: { type: String, required: true },
         status: { type: String, required: true, default: 'I am new' },
-        posts: [
-            {
-                default: [],
-                ref: 'Post',
-                type: Schema.Types.ObjectId,
-            },
-        ],
     },
     { timestamps: true, versionKey: false },
 );
@@ -54,3 +45,32 @@ userSchema.methods.comparePassword = function comparePassword(password: string):
 };
 
 export const UserModel = model<UserDocument>('User', userSchema);
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - name
+ *         - password
+ *       properties:
+ *         _id:
+ *           type: string
+ *         active:
+ *           type: boolean
+ *         email:
+ *           type: string
+ *         name:
+ *           type: string
+ *         password:
+ *           type: string
+ *         status:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *         updatedAt:
+ *           type: string
+ */

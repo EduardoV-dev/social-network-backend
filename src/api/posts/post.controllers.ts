@@ -25,7 +25,11 @@ class PostControllersClass {
 
     public createPost = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const response = await PostServices.create(req.body, req.file);
+            const response = await PostServices.create({
+                image: req.file,
+                post: req.body,
+                userId: res.locals.userId,
+            });
             res.status(200).send(response);
         } catch (error) {
             next(error);

@@ -6,3 +6,14 @@ export class HttpError extends Error {
         this.statusCode = statusCode;
     }
 }
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     HttpError:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *           example: "Some error message here..."
+ */
