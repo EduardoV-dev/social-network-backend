@@ -17,7 +17,7 @@ export { router };
 
 /**
  * @openapi
- * /status:
+ * /users/status:
  *   get:
  *     tags:
  *       - Users
