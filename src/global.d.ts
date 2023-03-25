@@ -1,14 +1,15 @@
 declare namespace NodeJS {
     interface ProcessEnv {
-        NODE_ENV: 'development' | 'production';
-        PORT: string;
-        MONGODB_USERNAME: string;
-        MONGODB_PASSWORD: string;
-        DB_NAME: string;
-        JWT_SECRET: string;
+        BASE_URL: string;
         CLOUDINARY_API_KEY: string;
         CLOUDINARY_API_SECRET: string;
         CLOUDINARY_CLOUD_NAME: string;
+        DB_NAME: string;
+        JWT_SECRET: string;
+        MONGODB_PASSWORD: string;
+        MONGODB_USERNAME: string;
+        NODE_ENV: 'development' | 'production';
+        PORT: number;
     }
 }
 
