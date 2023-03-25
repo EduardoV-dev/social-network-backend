@@ -8,7 +8,7 @@
     },
     "scripts": {
         "dev": "ts-node-dev src/app.ts",
-        "prod": "build && node build/app.js",
+        "prod": "yarn build && node build/app.js",
         "build": "tsc",
         "check-lint": "eslint . --ext js --ext ts",
         "lint": "eslint . --ext js --ext ts --fix",
