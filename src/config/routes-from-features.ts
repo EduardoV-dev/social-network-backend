@@ -32,30 +32,29 @@ const removeExtensionFromFile = (routeName: string) => routeName.split('.').shif
 
 /**
  * Loads all of the routes that are within any API inside the `api` folder, routes are loaded inside an express `router` with their respective routes (POST, GET, PUT, PATH, DELETE or any that you would be using insde a router).
- *
  * This function avoids to be adding new routes manually, instead, this is done in a programmatic way.
  *
  * For this to work, a certain file structure must be followed:
  *
  * ```
  * - src/
- * -- features/
- * --- [feature-name]/
- * ---- [(filename)-routes.ts]/ Where filename is any filename you want to set for that route
+ * -- api/
+ * --- [api-name]/
+ * ---- [(filename).routes.ts]/ Where filename is any filename you want to set for that route
  * ```
  *
- * The generated REST API route would be in this format: `/[feature-name]`,
+ * The generated REST API route would be in this format: `/[api-name]`,
  * which would contain any of the actions described in that route
  *
  * @example
- * posts ([(filename)-routes.ts]) has:
+ * posts ([(filename).routes.ts]) has:
  * ```
  *  router
  *     .get('/', controller)
  *     .post('/new-entry', postController)
  * ```
  *
- * A route within: `src/features/posts/post.routes.ts`, would result in the next endpoints:
+ * A route within: `src/api/posts/post.routes.ts`, would result in the next endpoints:
  * ```
  *  * /posts [GET]
  *  * /posts/new-entry [POST]
