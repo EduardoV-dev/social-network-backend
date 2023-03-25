@@ -8,7 +8,7 @@
     },
     "scripts": {
         "dev": "ts-node-dev src/app.ts",
-        "build": "tsc",
+        "build": "npx tsc",
         "start": "node build/app.js",
         "check-lint": "eslint . --ext js --ext ts",
         "lint": "eslint . --ext js --ext ts --fix",
